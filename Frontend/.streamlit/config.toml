@@ -1,0 +1,10 @@
+[server]
+# The port inside the container
+port = 8501
+
+# Required for Docker deployment
+headless = true
+
+# Let backend requests work without CORS blocks
+enableCORS = false
+enableXsrfProtection = false

@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Prevent Python from writing .pyc files and buffering stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# install packages from the requirements.txt:
+COPY requirements.txt .
+RUN  pip install --no-cache-dir -r requirements.txt
+
+COPY . ./src
+
+EXPOSE 8501
+
+# change the workdir
+WORKDIR /app/src
+CMD ["streamlit", "run", "main.py", "--server.address", "0.0.0.0", "--server.port", "8501"]

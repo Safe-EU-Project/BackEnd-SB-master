@@ -1,0 +1,15 @@
+# IDE & editor configs
+.idea/
+.vscode/
+
+# Python cache & virtual envs
+__pycache__/
+.venv/
+
+# OS/system files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
