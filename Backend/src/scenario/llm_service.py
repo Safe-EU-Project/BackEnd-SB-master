@@ -85,7 +85,9 @@ class LLMService:
     def extract_hour_title_description_per_incident(
         self, incident: str
     ) -> tuple[str, str, str]:
-        pattern = re.compile(r"\s*\((\d{2}:\d{2})\)\s*[–-]\s*(.+?)\s*$")
+        # Accept en-dash (–), em-dash (—) or plain hyphen (-) as the separator,
+        # since the LLM does not always produce the exact same dash character.
+        pattern = re.compile(r"\s*\((\d{2}:\d{2})\)\s*[–—-]\s*(.+?)\s*$")
         # split by line:
         hour_title_description = re.split("\n+", incident)
         hour_title, description = (
@@ -95,6 +97,16 @@ class LLMService:
         match = pattern.match(hour_title)
         if match:
             time, title = match.groups()
+        else:
+            # Fallback: pull the HH:MM if present anywhere, use the rest of the
+            # line (or a generic label) as title, so a single malformed header
+            # from the LLM doesn't fail the whole scenario creation.
+            logger.warning(
+                f"Incident header did not match expected format, using fallback: {hour_title!r}"
+            )
+            time_match = re.search(r"(\d{2}:\d{2})", hour_title)
+            time = time_match.group(1) if time_match else "00:00"
+            title = re.sub(r"^\s*T\+\d+\s*", "", hour_title).strip(" :–—-") or "Untitled Incident"
         return time, title.strip(":"), description
 
     def extract_content_from_expected_actions(self, action: str) -> str:
