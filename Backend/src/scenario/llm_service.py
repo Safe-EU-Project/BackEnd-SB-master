@@ -219,7 +219,12 @@ class LLMService:
         # take the incidents from the service response:
         actions = [
             f"Phase {index+1} - {incident.title}\n"
-            + f"Expected Actions: {incident.expected_actions[0]}"
+            + "Expected Actions: "
+            + (
+                " ".join(incident.expected_actions)
+                if incident.expected_actions
+                else "N/A"
+            )
             + "\n"
             for index, incident in enumerate(update_data.context)
         ]

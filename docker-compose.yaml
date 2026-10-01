@@ -31,15 +31,21 @@ services:
       KC_DB_PASSWORD: keycloak
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_PROXY: edge
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: 10.240.138.254
       KC_HOSTNAME_STRICT: false
+      # HTTP kept enabled for internal docker-network calls (backend -> safe_keycloak:8080).
       KC_HTTP_ENABLED: true
-      KC_PROXY_HEADERS: xforwarded
+      # HTTPS terminated directly by Keycloak (no reverse proxy) so the browser gets a
+      # real https:// origin — required for Secure/SameSite=None session cookies to work
+      # when the frontend (localhost:5173) and Keycloak (10.240.138.254) are different hosts.
+      KC_HTTPS_CERTIFICATE_FILE: /etc/certs/10.240.138.254.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /etc/certs/10.240.138.254-key.pem
     command:
       - start-dev
     ports:
-      - '8480:8080'
+      - '8480:8443'
+    volumes:
+      - ./nginx/certs:/etc/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
